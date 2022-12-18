@@ -2,7 +2,7 @@ package main
 
 import (
 	"log"
-	"golang/go/distributed-services-with-go/internal/server"
+	"golang/go/distributed-services-with-go/proglog/internal/server"
 )
 
 func main() {
