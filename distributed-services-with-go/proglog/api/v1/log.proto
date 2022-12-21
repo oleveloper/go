@@ -4,6 +4,29 @@ package log.v1;
 
 option go_package = "github.com/oleveloper/go/distributed-services-with-go/proglog/api/v1";
 
+service Log {
+    rpc Produce(ProduceRequest) returns (ProduceResponse) {}
+    rpc ProduceStream(stream ProduceRequest) returns (stream ProduceResponse) {}
+    rpc Consume(ConsumeRequest) returns (ConsumeResponse) {}
+    rpc ConsumeStream(ConsumeRequest) returns (stream ConsumeResponse) {}
+}
+
+message ProduceRequest {
+    Record record = 1;
+}
+
+message ProduceResponse {
+    uint64 offset = 1;
+}
+
+message ConsumeRequest {
+    uint64 offfset = 1;
+}
+
+message ConsumeResponse {
+    Record record = 1;
+}
+
 message Record {
     bytes value = 1;
     uint64 offset = 2;
