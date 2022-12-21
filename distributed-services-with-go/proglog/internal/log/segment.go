@@ -5,7 +5,7 @@ import (
 	"os"
 	"path"
 
-	api "golang/go/distributed-services-with-go/proglog/api/v1"
+	api "github.com/oleveloper/go/distributed-services-with-go/proglog/api/v1"
 	"google.golang.org/protobuf/proto"
 )
 
