@@ -20,7 +20,7 @@ message ProduceResponse {
 }
 
 message ConsumeRequest {
-    uint64 offfset = 1;
+    uint64 offset = 1;
 }
 
 message ConsumeResponse {
