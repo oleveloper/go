@@ -14,12 +14,12 @@ import (
 )
 
 type Log struct {
-	mu sync.RWMutex
-	Dir string
+	mu     sync.RWMutex
+	Dir    string
 	Config Config
 
 	activeSegment *segment
-	segments []*segment
+	segments      []*segment
 }
 
 func NewLog(dir string, c Config) (*Log, error) {
@@ -29,8 +29,8 @@ func NewLog(dir string, c Config) (*Log, error) {
 	if c.Segment.MaxIndexBytes == 0 {
 		c.Segment.MaxIndexBytes = 1024
 	}
-	l := &Log {
-		Dir: dir,
+	l := &Log{
+		Dir:    dir,
 		Config: c,
 	}
 
@@ -54,7 +54,7 @@ func (l *Log) setup() error {
 	}
 	var baseOffsets []uint64
 	for _, file := range files {
-		offStr := strings.TrimSuffix (
+		offStr := strings.TrimSuffix(
 			file.Name(),
 			path.Ext(file.Name()),
 		)
@@ -71,7 +71,7 @@ func (l *Log) setup() error {
 		i++
 	}
 	if l.segments == nil {
-		if err = l.newSegment (
+		if err = l.newSegment(
 			l.Config.Segment.InitialOffset,
 		); err != nil {
 			return err
@@ -143,7 +143,7 @@ func (l *Log) LowestOffset() (uint64, error) {
 func (l *Log) HighestOffset() (uint64, error) {
 	l.mu.RLock()
 	defer l.mu.RUnlock()
-	off := l.segments[len(l.segments) - 1].nextOffset
+	off := l.segments[len(l.segments)-1].nextOffset
 	if off == 0 {
 		return 0, nil
 	}
@@ -155,7 +155,7 @@ func (l *Log) Truncate(lowest uint64) error {
 	defer l.mu.Unlock()
 	var segments []*segment
 	for _, s := range l.segments {
-		if s.nextOffset <= lowest + 1 {
+		if s.nextOffset <= lowest+1 {
 			if err := s.Remove(); err != nil {
 				return err
 			}
@@ -183,7 +183,7 @@ func (l *Log) Reader() io.Reader {
 	defer l.mu.RUnlock()
 	readers := make([]io.Reader, len(l.segments))
 	for i, segment := range l.segments {
-		readers[i] = &originReader { segment.store, 0 }
+		readers[i] = &originReader{segment.store, 0}
 	}
 	return io.MultiReader(readers...)
 }
