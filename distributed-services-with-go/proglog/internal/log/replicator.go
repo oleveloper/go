@@ -16,10 +16,10 @@ type Replicator struct {
 
 	logger *zap.Logger
 
-	mu sync.Mutex
+	mu      sync.Mutex
 	servers map[string]chan struct{}
-	closed bool
-	close chan struct{}
+	closed  bool
+	close   chan struct{}
 }
 
 func (r *Replicator) Join(name, addr string) error {
@@ -48,7 +48,7 @@ func (r *Replicator) replicate(addr string, leave chan struct{}) {
 		return
 	}
 	defer cc.Close()
-	
+
 	client := api.NewLogClient(cc)
 
 	ctx := context.Background()
