@@ -330,7 +330,7 @@ var _ raft.StreamLayer = (*StreamLayer)(nil)
 type StreamLayer struct {
 	ln              net.Listener
 	serverTLSConfig *tls.Config
-	perrTLSConfig   *tls.Config
+	peerTLSConfig   *tls.Config
 }
 
 func NewStreamLayer(
