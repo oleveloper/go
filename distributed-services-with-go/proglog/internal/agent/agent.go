@@ -28,7 +28,6 @@ type Agent struct {
 	log        *log.DistributedLog
 	server     *grpc.Server
 	membership *discovery.Membership
-	replicator *log.Replicator
 	mux        cmux.CMux
 
 	shutdown     bool
@@ -62,6 +61,11 @@ func New(config Config) (*Agent, error) {
 		Config:    config,
 		shutdowns: make(chan struct{}),
 	}
+	logger, err := zap.NewProduction()
+	if err != nil {
+		return nil, err
+	}
+	zap.ReplaceGlobals(logger)
 	setup := []func() error{
 		a.setupLogger,
 		a.setupMux,
@@ -186,7 +190,6 @@ func (a *Agent) Shutdown() error {
 	close(a.shutdowns)
 	shutdown := []func() error{
 		a.membership.Leave,
-		a.replicator.Close,
 		func() error {
 			a.server.GracefulStop()
 			return nil
