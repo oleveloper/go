@@ -17,6 +17,7 @@ import (
 	api "github.com/oleveloper/go/distributed-services-with-go/proglog/api/v1"
 	"github.com/oleveloper/go/distributed-services-with-go/proglog/internal/agent"
 	"github.com/oleveloper/go/distributed-services-with-go/proglog/internal/config"
+	"github.com/oleveloper/go/distributed-services-with-go/proglog/internal/loadbalance"
 )
 
 func TestAgent(t *testing.T) {
@@ -91,6 +92,10 @@ func TestAgent(t *testing.T) {
 		},
 	)
 	require.NoError(t, err)
+
+	// wait until replication has finished
+	time.Sleep(3 * time.Second)
+
 	consumeResponse, err := leaderClient.Consume(
 		context.Background(),
 		&api.ConsumeRequest{
@@ -99,9 +104,6 @@ func TestAgent(t *testing.T) {
 	)
 	require.NoError(t, err)
 	require.Equal(t, consumeResponse.Record.Value, []byte("foo"))
-
-	// wait until replication has finished
-	time.Sleep(3 * time.Second)
 
 	followerClient := client(t, agents[1], peerTLSConfig)
 	consumeResponse, err = followerClient.Consume(
@@ -126,12 +128,19 @@ func TestAgent(t *testing.T) {
 	require.Equal(t, got, want)
 }
 
-func client(t *testing.T, agent *agent.Agent, tlsConfig *tls.Config) api.LogClient {
+func client(t *testing.T,
+	agent *agent.Agent,
+	tlsConfig *tls.Config,
+) api.LogClient {
 	tlsCreds := credentials.NewTLS(tlsConfig)
 	opts := []grpc.DialOption{grpc.WithTransportCredentials(tlsCreds)}
 	rpcAddr, err := agent.Config.RPCAddr()
 	require.NoError(t, err)
-	conn, err := grpc.Dial(rpcAddr, opts...)
+	conn, err := grpc.Dial(fmt.Sprintf(
+		"%s:///%s",
+		loadbalance.Name,
+		rpcAddr,
+	), opts...)
 	require.NoError(t, err)
 	client := api.NewLogClient(conn)
 	return client
